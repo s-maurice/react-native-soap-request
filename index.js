@@ -1,6 +1,7 @@
 import { DOMParser, XMLSerializer } from 'xmldom';
 import moment from 'moment';
 import { parseString  } from 'react-native-xml2js';
+import { stripPrefix } from 'react-native-xml2js/lib/processors';
 
 const xmlHeader = '<?xml version="1.0" encoding="utf-8"?>';
 
@@ -30,7 +31,7 @@ class SoapRequest {
     this.responseDoc = null;
   }
 
-  createRequest(request) {
+  createRequest(requestName, request) {
     this.xmlDoc = new DOMParser().parseFromString('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></soap:Envelope>'); 
     this.rootElement = this.xmlDoc.documentElement;
 
@@ -48,9 +49,10 @@ class SoapRequest {
 
     // Build request body
     const bodyElement = this.appendChild(this.rootElement, 'soap:Body');
-
-    this.eachRecursive(request, bodyElement); 
-
+    bodyElement.setAttribute('xmlns:soapenv', "http://schemas.xmlsoap.org/soap/envelope");
+    bodyElement.setAttribute('xmlns:sch', "http://ws.e-services.service.smou.org/schemas");
+    const requestBody = this.appendChild(bodyElement, 'sch:'+requestName);
+    this.eachRecursive(request, requestBody); 
 
     //-------------------
  
@@ -77,11 +79,11 @@ class SoapRequest {
           }
           delete obj[k].attributes;
         }
-        this.eachRecursive(obj[k], this.appendChild(currentElement, k));
+        this.eachRecursive(obj[k], this.appendChild(currentElement, "sch:" + k));
       }
       else {
         let text = obj[k];
-        this.appendChild(currentElement, k, text);
+        this.appendChild(currentElement, "sch:" + k, text);
       }
     }
   }
@@ -106,12 +108,12 @@ class SoapRequest {
       securityElement.setAttribute('xmlns:wsse', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd');
       securityElement.setAttribute('xmlns:wsu', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd');
 
-      const timestampElement = this.appendChild(securityElement, 'wsu:Timestamp');
+      // const timestampElement = this.appendChild(securityElement, 'wsu:Timestamp');
       const date = new Date();
-      timestampElement.setAttribute('wsu:Id', 'Timestamp-'+date.toISOString());
+      // timestampElement.setAttribute('wsu:Id', 'Timestamp-'+date.toISOString());
 
-      const createdElement = this.appendChild(timestampElement, 'wsu:Created', date.toISOString());
-      const expiresElement = this.appendChild(timestampElement, 'wsu:Expires', moment(date).add(10, 'm').toISOString());
+      // const createdElement = this.appendChild(timestampElement, 'wsu:Created', date.toISOString());
+      // const expiresElement = this.appendChild(timestampElement, 'wsu:Expires', moment(date).add(10, 'm').toISOString());
 
       const usernameTokenElement = this.appendChild(securityElement, 'wsse:UsernameToken');
       usernameTokenElement.setAttribute('xmlns:wsu', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd');
@@ -123,7 +125,7 @@ class SoapRequest {
   }
 
 
-  async sendRequest() {
+  async sendRequest(responseName) {
 
     if (!this.xmlRequest)
       throw new Error('Request empty, please call createRequest before sendRequest');
@@ -144,11 +146,21 @@ class SoapRequest {
       console.log('xmlResponse', this.xmlResponse);
       
       // Beware this relies on sync callback behaviour which apparently could change in future versions of react-native-xml2js
-      parseString(this.xmlResponse, (err, result) => {
-        if (err) {
-          throw (err);
-        }
-        this.responseDoc = result;
+      parseString(this.xmlResponse, {
+        explicitRoot: false,
+        explicitArray: false,
+        tagNameProcessors: [stripPrefix],
+        attrNameProcessors: [stripPrefix],
+        valueProcessors: [stripPrefix],
+        attrValueProcessors: [stripPrefix]},
+        (err, result) => {
+          if (err) {
+            throw (err);
+          }
+          this.responseDoc = result;
+          if (responseName){
+            this.responseDoc = result.Body[responseName]
+          }
       });
 
       return this.responseDoc;
