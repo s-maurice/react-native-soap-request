@@ -4,7 +4,8 @@ Simple module for making SOAP requests with WSSecurity
 ### Install
 
 ```
-npm install react-native-soap-request --save
+npm install LevisLuong/react-native-soap-request --save
+yarn add LevisLuong/react-native-soap-request
 ```
 
 ### Example Usage
@@ -24,24 +25,10 @@ const soapRequest = new SoapRequest({
   requestURL: soapWebserviceURL
 });
 
-const xmlRequest = soapRequest.createRequest({
-  'soap:ProductRegistrationRequest': {
-    attributes: {
-      'xmlns:soap': 'http://soap.acme.com/2.0/soap-access-services',
-      'xmlns:cmn': 'http://soap.acme.com/2.0/soap-common-types'
-    },
-    'soap:productId': {
-      'cmn:internalId': {
-        'cmn:id': productId
-      }
-    },
-    'soap:userId': {
-      'cmn:internalId': {
-        'cmn:id': userId
-      }
-    }
-  }
-});
+const xmlRequest = soapRequest.createRequest("LoginRequest", {
+        username: "abc",
+        password: "xyz"
+      })
 
 const response = await soapRequest.sendRequest();
 
