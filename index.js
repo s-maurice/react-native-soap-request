@@ -158,7 +158,7 @@ class SoapRequest {
             throw (err);
           }
           this.responseDoc = result;
-          if (responseName){
+          if (responseName && result){
             this.responseDoc = result.Body[responseName]
           }
       });
