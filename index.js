@@ -151,7 +151,6 @@ class SoapRequest {
         explicitArray: false,
         tagNameProcessors: [stripPrefix],
         attrNameProcessors: [stripPrefix],
-        valueProcessors: [stripPrefix],
         attrValueProcessors: [stripPrefix]},
         (err, result) => {
           if (err) {
