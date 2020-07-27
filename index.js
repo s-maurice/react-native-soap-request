@@ -71,7 +71,25 @@ class SoapRequest {
     {
       if (!obj.hasOwnProperty(k))
         continue;       // skip this property
-
+      
+      if (Array.isArray(obj[k]) && obj[k].length > 0) {
+        obj[k].forEach((item) => {
+          if (typeof item == "object" && item !== null) {
+            if (Object.keys(item).find(x => x == 'attributes')) {
+              for (var attr in item.attributes) {
+                currentElement.setAttribute(attr, item.attributes[attr]);
+              }
+              delete obj[k].attributes;
+            }
+            this.eachRecursive(item, this.appendChild(currentElement, "sch:" + k));
+          }
+          else {
+            let text = item;
+            this.appendChild(currentElement, "sch:", text);
+          }
+        })
+      }
+      
       if (typeof obj[k] == "object" && obj[k] !== null) {
         if (Object.keys(obj[k]).find(x => x == 'attributes')) {
           for (var attr in obj[k].attributes) {
