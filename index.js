@@ -142,7 +142,15 @@ class SoapRequest {
     }
   }
 
-
+  fetchWithTimeout(url, options, timeout = 30000) {
+    return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), timeout)
+        )
+    ]);
+  }
+  
   async sendRequest(responseName) {
 
     if (!this.xmlRequest)
@@ -151,7 +159,7 @@ class SoapRequest {
       throw new Error('requestURL empty!');
 
     try {
-      let response = await fetch(this.requestURL, {
+      let response = await this.fetchWithTimeout(this.requestURL, {
           method: 'POST',
           headers: {
             'Accept': 'text/xml',
@@ -184,6 +192,18 @@ class SoapRequest {
 
     } catch(error) {
       console.warn(error);
+      const err = {
+          error: "[TypeError: Something when wrong]",
+          message: "Something when wrong!",
+          status: 'FAIL',
+          code: 2005
+      }
+      this.responseDoc = err;
+      if (responseName && err ) {
+        this.responseDoc = err;
+      }
+      return this.responseDoc
+      // console.warn(error);
     }
   }
 }
