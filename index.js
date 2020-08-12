@@ -193,8 +193,8 @@ class SoapRequest {
     } catch(error) {
       console.warn(error);
       const err = {
-          error: "[TypeError: Something when wrong]",
-          message: "Something when wrong!",
+          error: "[TypeError: Something went wrong]",
+          message: "Something went wrong!",
           status: 'FAIL',
           code: 2005
       }
