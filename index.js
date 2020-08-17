@@ -85,12 +85,12 @@ class SoapRequest {
           }
           else {
             let text = item;
-            this.appendChild(currentElement, "sch:", text);
+            this.appendChild(currentElement, "sch:" + k, text);
           }
         })
       }
       
-      if (typeof obj[k] == "object" && obj[k] !== null) {
+      else if (typeof obj[k] == "object" && obj[k] !== null) {
         if (Object.keys(obj[k]).find(x => x == 'attributes')) {
           for (var attr in obj[k].attributes) {
             currentElement.setAttribute(attr, obj[k].attributes[attr]);
