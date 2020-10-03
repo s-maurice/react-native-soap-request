@@ -25,6 +25,11 @@ class SoapRequest {
       this.requestURL = props.requestURL;
     }
 
+    this.timeout = 10000;
+    if (props.timeout) {
+      this.timeout = props.timeout;
+    }
+
     this.xmlRequest = null;
     this.xmlResponse = null;
     this.responseDoc = null;
@@ -140,7 +145,7 @@ class SoapRequest {
     }
   }
 
-  fetchWithTimeout(url, options, timeout = 30000) {
+  fetchWithTimeout(url, options, timeout = 10000) {
     return Promise.race([
         fetch(url, options),
         new Promise((_, reject) =>
@@ -164,7 +169,7 @@ class SoapRequest {
             'Content-Type': 'text/xml',
           },
           body: this.xmlRequest
-          });
+          }, this.timeout);
 
       this.xmlResponse = await response.text();
       console.log('xmlResponse', this.xmlResponse);
