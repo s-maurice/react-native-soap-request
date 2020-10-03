@@ -34,9 +34,10 @@ class SoapRequest {
     this.xmlDoc = new DOMParser().parseFromString('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></soap:Envelope>'); 
     this.rootElement = this.xmlDoc.documentElement;
 
+    let ns_prefix = 'tns';
+
     if (this.targetNamespace) {
-      this.rootElement.setAttribute('xmlns:ch0', this.targetNamespace);
-      this.rootElement.setAttribute('xmlns:tns', this.targetNamespace);
+      this.rootElement.setAttribute('xmlns:' + ns_prefix, this.targetNamespace);
     }
       
     if (this.commonTypes) {
@@ -48,10 +49,8 @@ class SoapRequest {
 
     // Build request body
     const bodyElement = this.appendChild(this.rootElement, 'soap:Body');
-    bodyElement.setAttribute('xmlns:soapenv', "http://schemas.xmlsoap.org/soap/envelope");
-    bodyElement.setAttribute('xmlns:sch', "http://ws.e-services.service.smou.org/schemas");
-    const requestBody = this.appendChild(bodyElement, 'sch:'+requestName);
-    this.eachRecursive(request, requestBody); 
+    const requestBody = this.appendChild(bodyElement, ns_prefix + ':' + requestName);
+    this.eachRecursive(request, requestBody, ns_prefix);
 
     //-------------------
  
@@ -61,7 +60,7 @@ class SoapRequest {
     return this.xmlRequest;
   }
 
-  eachRecursive(obj, parentElement)
+  eachRecursive(obj, parentElement, ns_prefix)
   {
     let elementName = Object.keys(obj)[0];
     let currentElement = parentElement; 
@@ -80,11 +79,11 @@ class SoapRequest {
               }
               delete obj[k].attributes;
             }
-            this.eachRecursive(item, this.appendChild(currentElement, "sch:" + k));
+            this.eachRecursive(item, this.appendChild(currentElement, ns_prefix + ":" + k), ns_prefix);
           }
           else {
             let text = item;
-            this.appendChild(currentElement, "sch:" + k, text);
+            this.appendChild(currentElement, ns_prefix + ":" + k, text);
           }
         })
       }
@@ -96,11 +95,11 @@ class SoapRequest {
           }
           delete obj[k].attributes;
         }
-        this.eachRecursive(obj[k], this.appendChild(currentElement, "sch:" + k));
+        this.eachRecursive(obj[k], this.appendChild(currentElement, ns_prefix + ":" + k), ns_prefix);
       }
       else {
         let text = obj[k];
-        this.appendChild(currentElement, "sch:" + k, text);
+        this.appendChild(currentElement, ns_prefix+ ":" + k, text);
       }
     }
   }
