@@ -25,10 +25,7 @@ class SoapRequest {
       this.requestURL = props.requestURL;
     }
 
-    this.timeout = 10000;
-    if (props.timeout) {
-      this.timeout = props.timeout;
-    }
+    this.timeout = props.timeout ? props.timeout : 10000
 
     this.xmlRequest = null;
     this.xmlResponse = null;
