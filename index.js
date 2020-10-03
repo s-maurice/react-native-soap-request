@@ -1,5 +1,4 @@
 import { DOMParser, XMLSerializer } from 'xmldom';
-import moment from 'moment';
 import { parseString  } from 'react-native-xml2js';
 import { stripPrefix } from 'react-native-xml2js/lib/processors';
 

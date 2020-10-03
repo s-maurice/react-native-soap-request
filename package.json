@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/adamski/react-native-soap-request/issues"
   },
-  "homepage": "https://github.com/adamski/react-native-soap-request#readme"
+  "homepage": "https://github.com/adamski/react-native-soap-request#readme",
+  "dependencies": {
+    "react-native-xml2js": "^1.0.3",
+    "xmldom": "^0.3.0"
+  }
 }
