@@ -174,7 +174,7 @@ class SoapRequest {
       // Beware this relies on sync callback behaviour which apparently could change in future versions of react-native-xml2js
       parseString(this.xmlResponse, {
         explicitRoot: false,
-        explicitArray: false,
+        explicitArray: true,
         tagNameProcessors: [stripPrefix],
         attrNameProcessors: [stripPrefix],
         attrValueProcessors: [stripPrefix]},
@@ -184,7 +184,7 @@ class SoapRequest {
           }
           this.responseDoc = result;
           if (responseName && result){
-            this.responseDoc = result.Body[responseName]
+            this.responseDoc = result.Body[0][responseName]
           }
       });
 
